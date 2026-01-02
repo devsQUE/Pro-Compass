@@ -1,38 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Compass</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Device Orientation Compass</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-    <div class="compass-container">
-        <div class="compass-case">
-            <div class="compass-dial" id="compassDial">
+<body>
+    <div class="compass">
+        <div class="case">
+            <div class="dial" id="dial">
                 <span class="direction n">N</span>
                 <span class="direction e">E</span>
                 <span class="direction s">S</span>
                 <span class="direction w">W</span>
-                <div class="ticks"></div>
+                <div class="ticks" id="ticks"></div>
             </div>
             <div class="needle"></div>
             <div class="pivot"></div>
         </div>
 
         <div class="readout">
-            <h1 id="degreeDisplay">--°</h1>
-            <p id="directionText">Waiting...</p>
+            <h1 id="deg">--°</h1>
+            <p id="dir">Inactive</p>
         </div>
-        
-        <p id="status" style="font-size: 0.8rem; color: #777; margin-top: 10px;">
-            Click Start to Enable
-        </p>
-        
-        <button id="startBtn" class="permission-btn">Start Compass</button>
+
+        <button id="toggle">Start Compass</button>
+        <div class="status" id="status">Hold device flat and move in a figure-8 to calibrate.</div>
     </div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
