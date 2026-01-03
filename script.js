@@ -1,93 +1,76 @@
-const dial = document.getElementById("dial");
-const degEl = document.getElementById("deg");
-const dirEl = document.getElementById("dir");
-const btn = document.getElementById("toggle");
-const statusEl = document.getElementById("status");
+const compassDial = document.getElementById('compassDial');
+const degreeDisplay = document.getElementById('degreeDisplay');
+const directionText = document.getElementById('directionText');
+const startBtn = document.getElementById('startBtn');
 
-let active = false;
-let lastHeading = null;
-const SMOOTHING = 0.15; // EMA factor
-
-function normalize(angle) {
-    return (angle + 360) % 360;
+// Helper to convert degrees to cardinal direction
+function getCardinalDirection(angle) {
+    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    // Divide 360 into 8 chunks of 45 degrees. Offset by 22.5 to center the label.
+    const index = Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8;
+    return directions[index];
 }
 
-function smooth(current) {
-    if (lastHeading === null) {
-        lastHeading = current;
-        return current;
-    }
-    const delta = ((current - lastHeading + 540) % 360) - 180;
-    lastHeading = normalize(lastHeading + delta * SMOOTHING);
-    return lastHeading;
+function handleOrientation(event) {
+    let compass = event.webkitCompassHeading || Math.abs(event.alpha - 360);
+    
+    // Smooth update for the visual dial
+    // Invert rotation because the dial rotates, not the needle
+    compassDial.style.transform = `rotate(${-compass}deg)`;
+
+    // Update Text
+    let roundedCompass = Math.round(compass);
+    degreeDisplay.innerText = `${roundedCompass}°`;
+    directionText.innerText = getCardinalDirection(roundedCompass);
 }
 
-function cardinal(angle) {
-    const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-    return dirs[Math.round(angle / 45) % 8];
-}
-
-function onOrientation(e) {
-    let heading = null;
-
-    if (typeof e.webkitCompassHeading === "number") {
-        heading = e.webkitCompassHeading;
-    } else if (e.absolute && typeof e.alpha === "number") {
-        heading = 360 - e.alpha;
+// Function to start the compass (mainly for iOS 13+)
+const startCompass = () => {
+    // Check if DeviceOrientationEvent is defined
+    if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS 13+ specific permission request
+        window.DeviceOrientationEvent.requestPermission()
+            .then(response => {
+                if (response === 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation, true);
+                    startBtn.style.display = 'none'; // Hide button after granting
+                } else {
+                    alert("Permission denied. The compass requires access to device orientation.");
+                }
+            })
+            .catch(console.error);
     } else {
-        statusEl.textContent = "Orientation available but not absolute.";
-        return;
+        // Non-iOS 13+ devices (Android, older iOS)
+        window.addEventListener('deviceorientation', handleOrientation, true);
+        startBtn.style.display = 'none';
     }
+};
 
-    heading = smooth(normalize(heading));
-    dial.style.transform = `rotate(${-heading}deg)`;
-
-    [...dial.querySelectorAll(".direction")].forEach(el => {
-        el.style.transform += ` rotate(${heading}deg)`;
-    });
-
-    degEl.textContent = `${Math.round(heading)}°`;
-    dirEl.textContent = cardinal(heading);
+// Initial check to see if we need to show the button
+if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+    startBtn.style.display = 'block';
+    startBtn.addEventListener('click', startCompass);
+} else {
+    // Auto-start for devices that don't need permission
+    startCompass();
 }
 
-async function start() {
-    if (typeof DeviceOrientationEvent?.requestPermission === "function") {
-        const res = await DeviceOrientationEvent.requestPermission();
-        if (res !== "granted") {
-            statusEl.textContent = "Permission denied.";
-            return;
-        }
-    }
-
-    window.addEventListener("deviceorientation", onOrientation, true);
-    active = true;
-    btn.textContent = "Stop Compass";
-    statusEl.textContent = "Sensor active. Keep device flat for best accuracy.";
-}
-
-function stop() {
-    window.removeEventListener("deviceorientation", onOrientation, true);
-    active = false;
-    lastHeading = null;
-    degEl.textContent = "--°";
-    dirEl.textContent = "Inactive";
-    btn.textContent = "Start Compass";
-    statusEl.textContent = "Compass stopped.";
-}
-
-btn.onclick = () => active ? stop() : start();
-
-// ticks
-const ticks = document.getElementById("ticks");
-for (let i = 0; i < 360; i += 30) {
-    const t = document.createElement("div");
-    t.style.position = "absolute";
-    t.style.width = "3px";
-    t.style.height = "12px";
-    t.style.background = "#777";
-    t.style.left = "50%";
-    t.style.top = "0";
-    t.style.transformOrigin = "0 120px";
-    t.style.transform = `translateX(-50%) rotate(${i}deg)`;
-    ticks.appendChild(t);
+// Optional: Add simple ticks dynamically for better visual
+const ticksContainer = document.querySelector('.ticks');
+for (let i = 0; i < 360; i += 15) { // Tick every 15 degrees
+    const tick = document.createElement('div');
+    tick.style.position = 'absolute';
+    tick.style.width = i % 90 === 0 ? '4px' : '2px'; // Thicker ticks for N, E, S, W
+    tick.style.height = i % 90 === 0 ? '15px' : '10px';
+    tick.style.backgroundColor = '#555';
+    tick.style.left = '50%';
+    tick.style.top = '0';
+    tick.style.transformOrigin = 'bottom center';
+    // Calculate rotation and position. 
+    // We set transform-origin to center of the dial (relative to the tick)
+    // Actually simpler: Rotate the tick wrapper or set transform origin
+    tick.style.transformOrigin = `0 120px`; // Half of dial height
+    tick.style.transform = `translateX(-50%) rotate(${i}deg)`;
+    
+    ticksContainer.appendChild(tick);
 }
