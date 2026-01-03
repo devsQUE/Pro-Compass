@@ -2,36 +2,40 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Device Orientation Compass</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Compass</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
-    <div class="compass">
-        <div class="case">
-            <div class="dial" id="dial">
-                <span class="direction n">N</span>
-                <span class="direction e">E</span>
-                <span class="direction s">S</span>
-                <span class="direction w">W</span>
-                <div class="ticks" id="ticks"></div>
-            </div>
-            <div class="needle"></div>
-            <div class="pivot"></div>
-        </div>
 
-        <div class="readout">
-            <h1 id="deg">--°</h1>
-            <p id="dir">Inactive</p>
-        </div>
+  <div class="compass-container">
+    <div class="compass-case">
+      <div class="compass-dial" id="compassDial">
+        <span class="direction n">N</span>
+        <span class="direction e">E</span>
+        <span class="direction s">S</span>
+        <span class="direction w">W</span>
 
-        <button id="toggle">Start Compass</button>
-        <div class="status" id="status">Hold device flat and move in a figure-8 to calibrate.</div>
+        <div class="ticks"></div>
+      </div>
+
+      <div class="needle"></div>
+
+      <div class="pivot"></div>
     </div>
 
-    <script src="script.js"></script>
+    <div class="readout">
+      <h1 id="degreeDisplay">0°</h1>
+      <p id="directionText">N</p>
+    </div>
+
+    <button id="startBtn" class="permission-btn">Start Compass</button>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 
 </html>
